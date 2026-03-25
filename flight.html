@@ -22,7 +22,7 @@
       --color-accent-muted: rgba(37, 99, 235, 0.1);
       --radius: 8px;
       --radius-sm: 6px;
-      --layout-max: 520px;
+      --layout-max: 600px;
       --color-flight: var(--color-accent);
       --color-flight-light: var(--color-accent-muted);
       --color-layover: var(--color-ink-muted);
@@ -48,10 +48,11 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: var(--font);
+      font-size: 18px;
       color: var(--color-ink);
       background: var(--color-bg);
       min-height: 100vh;
-      line-height: 1.4;
+      line-height: 1.48;
       -webkit-font-smoothing: antialiased;
     }
     .status-bar {
@@ -60,11 +61,11 @@
       z-index: 100;
       background: var(--color-bg);
       border-bottom: 1px solid var(--color-border);
-      padding: 8px 14px 10px;
+      padding: 12px 18px 14px;
     }
     .status-bar__inner { max-width: var(--layout-max); margin: 0 auto; }
     .status-bar__text {
-      font-size: 11px;
+      font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.01em;
       margin-bottom: 6px;
@@ -74,8 +75,8 @@
       color: var(--color-ink);
       font-variant-numeric: tabular-nums;
     }
-    .status-bar__text i { font-size: 11px; color: var(--color-accent); width: 1em; text-align: center; }
-    .status-bar__track { height: 2px; background: var(--color-track); border-radius: 0; overflow: hidden; }
+    .status-bar__text i { font-size: 15px; color: var(--color-accent); width: 1em; text-align: center; }
+    .status-bar__track { height: 3px; background: var(--color-track); border-radius: 0; overflow: hidden; }
     .status-bar__fill {
       height: 100%;
       background: var(--color-accent);
@@ -84,12 +85,12 @@
     }
     .flight-header {
       text-align: center;
-      padding: 20px 14px 12px;
+      padding: 24px 18px 16px;
       max-width: var(--layout-max);
       margin: 0 auto;
     }
     .flight-header__route {
-      font-size: clamp(1.125rem, 4vw, 1.35rem);
+      font-size: clamp(1.5rem, 5vw, 1.85rem);
       font-weight: 700;
       letter-spacing: -0.02em;
       display: flex;
@@ -99,40 +100,40 @@
       flex-wrap: wrap;
     }
     .flight-header__route i { color: var(--color-accent); font-size: 0.65em; }
-    .flight-header__sub { color: var(--color-ink-muted); font-size: 12px; margin-top: 6px; font-weight: 500; }
+    .flight-header__sub { color: var(--color-ink-muted); font-size: 16px; margin-top: 8px; font-weight: 500; }
     .flight-header__duration {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--color-ink-muted);
-      margin-top: 10px;
-      padding: 4px 10px;
+      margin-top: 12px;
+      padding: 7px 14px;
       border: 1px solid var(--color-border);
       border-radius: var(--radius-sm);
       background: var(--color-card);
     }
-    .flight-header__duration i { color: var(--color-accent); font-size: 9px; }
-    .timeline { max-width: var(--layout-max); margin: 0 auto; padding: 4px 14px 28px; position: relative; }
+    .flight-header__duration i { color: var(--color-accent); font-size: 12px; }
+    .timeline { max-width: var(--layout-max); margin: 0 auto; padding: 6px 18px 32px; position: relative; }
     .segment { display: flex; gap: 10px; position: relative; }
     .segment__rail {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 24px;
+      width: 32px;
       flex-shrink: 0;
     }
     .segment__node {
-      width: 26px;
-      height: 26px;
-      border-radius: 4px;
+      width: 34px;
+      height: 34px;
+      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 11px;
+      font-size: 15px;
       flex-shrink: 0;
       z-index: 2;
       position: relative;
@@ -160,7 +161,7 @@
     .segment__bar {
       width: 1px;
       flex: 1;
-      min-height: 24px;
+      min-height: 32px;
       background: var(--color-track);
       position: relative;
       overflow: hidden;
@@ -180,7 +181,7 @@
     .segment__bar-fill--flight { background: var(--color-accent); }
     .card__track {
       position: relative;
-      height: 22px;
+      height: 30px;
       flex: 1;
       display: flex;
       align-items: center;
@@ -203,7 +204,7 @@
       left: 0%;
       transform: translate(-50%, -50%);
       color: var(--color-accent);
-      font-size: 10px;
+      font-size: 14px;
       transition: left 0.35s ease;
       z-index: 2;
     }
@@ -213,7 +214,7 @@
       flex: 1;
       background: var(--color-card);
       border-radius: var(--radius);
-      padding: 10px 12px;
+      padding: 14px 16px;
       margin-bottom: 8px;
       border: 1px solid var(--color-border);
       transition: border-color 0.15s ease, opacity 0.15s ease;
@@ -235,11 +236,11 @@
       border-bottom: 1px solid var(--color-border);
     }
     .card__type {
-      font-size: 9px;
+      font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      padding: 3px 6px;
+      padding: 5px 9px;
       border-radius: 4px;
       border: 1px solid var(--color-border);
       background: var(--color-bg);
@@ -251,7 +252,7 @@
       border-color: var(--color-border);
     }
     .card__flight-no {
-      font-size: 11px;
+      font-size: 15px;
       font-weight: 700;
       color: var(--color-accent);
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
@@ -260,29 +261,29 @@
     .card__route { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
     .card__airport { text-align: center; }
     .card__code {
-      font-size: 15px;
+      font-size: 20px;
       font-weight: 700;
       line-height: 1.1;
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
       font-variant-numeric: tabular-nums;
     }
-    .card__city { font-size: 10px; color: var(--color-ink-muted); font-weight: 500; margin-top: 1px; }
+    .card__city { font-size: 13px; color: var(--color-ink-muted); font-weight: 500; margin-top: 2px; }
     .card__times {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      font-size: 11px;
+      font-size: 15px;
       color: var(--color-ink-muted);
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
       font-variant-numeric: tabular-nums;
     }
     .card__time { font-weight: 600; color: var(--color-ink); }
-    .card__tz { font-size: 9px; color: var(--color-ink-muted); font-weight: 500; }
-    .card__duration { text-align: center; font-size: 9px; color: var(--color-ink-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
-    .card__duration i { font-size: 8px; color: var(--color-accent); margin-right: 2px; }
-    .card__label { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .card__tz { font-size: 12px; color: var(--color-ink-muted); font-weight: 500; }
+    .card__duration { text-align: center; font-size: 12px; color: var(--color-ink-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .card__duration i { font-size: 11px; color: var(--color-accent); margin-right: 2px; }
+    .card__label { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
     .card__detail {
-      font-size: 11px;
+      font-size: 15px;
       color: var(--color-ink-muted);
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
       font-variant-numeric: tabular-nums;
@@ -292,16 +293,16 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 10px;
+      font-size: 14px;
       font-weight: 700;
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
       color: var(--color-accent);
       border: 1px dashed var(--color-border);
       background: var(--color-bg);
-      padding: 4px 8px;
+      padding: 7px 12px;
       border-radius: 4px;
     }
-    .card__boarding i { font-size: 9px; }
+    .card__boarding i { font-size: 12px; }
     .card__boarding--pulse { animation: boardingPulseCp 1.5s ease-in-out infinite; }
     @keyframes boardingPulseCp {
       0%, 100% { border-color: var(--color-border); }
@@ -309,15 +310,15 @@
     }
     @media (prefers-reduced-motion: reduce) { .card__boarding--pulse { animation: none; } }
     .destination__node {
-      width: 28px;
-      height: 28px;
-      border-radius: 4px;
+      width: 38px;
+      height: 38px;
+      border-radius: 5px;
       background: var(--color-card);
       border: 1px solid var(--color-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 20px;
       position: absolute;
       left: 12px;
     }
@@ -325,9 +326,9 @@
       background: var(--color-accent-muted);
       border-color: var(--color-accent);
     }
-    .destination__city { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+    .destination__city { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
     .destination__time {
-      font-size: 11px;
+      font-size: 15px;
       color: var(--color-ink-muted);
       font-weight: 500;
       font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
@@ -337,12 +338,12 @@
     .destination-wrap {
       max-width: var(--layout-max);
       margin: 0 auto;
-      padding: 0 14px 40px;
+      padding: 0 18px 44px;
       position: relative;
       display: flex;
       align-items: center;
     }
-    .destination-wrap .destination__content { margin-left: 44px; display: flex; align-items: center; gap: 8px; }
+    .destination-wrap .destination__content { margin-left: 52px; display: flex; align-items: center; gap: 10px; }
     .arrived-banner {
       display: none;
       text-align: center;
@@ -352,11 +353,11 @@
       border-top: 1px solid var(--color-border);
     }
     .arrived-banner--show { display: block; }
-    .arrived-banner__text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
-    .arrived-banner__sub { color: var(--color-ink-muted); font-size: 12px; margin-top: 4px; }
+    .arrived-banner__text { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+    .arrived-banner__sub { color: var(--color-ink-muted); font-size: 16px; margin-top: 6px; }
     @media (max-width: 480px) {
-      .card__code { font-size: 14px; }
-      .segment__card { padding: 8px 10px; }
+      .card__code { font-size: 18px; }
+      .segment__card { padding: 13px 15px; }
     }
   </style>
 </head>
