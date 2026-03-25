@@ -6,210 +6,164 @@
   <title>Brisbane → Porto — Flight Tracker</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
   <style>
     :root {
-      --font: "Poppins", system-ui, sans-serif;
-      --color-ink: #1e293b;
-      --color-ink-muted: #64748b;
-      --color-bg: #f0f4ff;
-      --color-card: #ffffff;
-      --color-flight: #3b82f6;
-      --color-flight-light: #dbeafe;
-      --color-layover: #f59e0b;
-      --color-layover-light: #fef3c7;
-      --color-drive: #10b981;
-      --color-drive-light: #d1fae5;
-      --color-progress: #ec4899;
-      --color-track: #e2e8f0;
-      --color-complete: #22c55e;
-      --radius: 16px;
-      --radius-sm: 10px;
-      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.04);
-      --shadow-lg: 0 4px 20px rgba(0,0,0,.1);
+      --font: "IBM Plex Sans", system-ui, sans-serif;
+      --color-ink: #171717;
+      --color-ink-muted: #737373;
+      --color-bg: #ffffff;
+      --color-card: #fafafa;
+      --color-border: #e5e5e5;
+      --color-track: #e5e5e5;
+      --color-accent: #2563eb;
+      --color-accent-contrast: #ffffff;
+      --color-accent-muted: rgba(37, 99, 235, 0.1);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --layout-max: 520px;
+      --color-flight: var(--color-accent);
+      --color-flight-light: var(--color-accent-muted);
+      --color-layover: var(--color-ink-muted);
+      --color-layover-light: transparent;
+      --color-drive: var(--color-ink-muted);
+      --color-drive-light: transparent;
+      --color-progress: var(--color-accent);
+      --color-complete: var(--color-accent);
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
-        --color-ink: #e2e8f0;
-        --color-ink-muted: #94a3b8;
-        --color-bg: #0f172a;
-        --color-card: #1e293b;
-        --color-track: #334155;
-        --color-flight-light: #1e3a5f;
-        --color-layover-light: #422006;
-        --color-drive-light: #064e3b;
-        --shadow: 0 1px 3px rgba(0,0,0,.3), 0 4px 12px rgba(0,0,0,.2);
-        --shadow-lg: 0 4px 20px rgba(0,0,0,.4);
+        --color-ink: #fafafa;
+        --color-ink-muted: #a3a3a3;
+        --color-bg: #0a0a0a;
+        --color-card: #171717;
+        --color-border: #262626;
+        --color-track: #262626;
+        --color-accent: #60a5fa;
+        --color-accent-contrast: #0f172a;
+        --color-accent-muted: rgba(96, 165, 250, 0.15);
       }
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: var(--font);
       color: var(--color-ink);
       background: var(--color-bg);
       min-height: 100vh;
-      line-height: 1.5;
+      line-height: 1.4;
       -webkit-font-smoothing: antialiased;
     }
-
-    /* ── Status Bar ── */
     .status-bar {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--color-track);
-      padding: 12px 20px;
-      transition: all .3s;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      padding: 8px 14px 10px;
     }
-    @media (prefers-color-scheme: dark) {
-      .status-bar { background: rgba(15,23,42,.85); }
-    }
-    .status-bar__inner {
-      max-width: 600px;
-      margin: 0 auto;
-    }
+    .status-bar__inner { max-width: var(--layout-max); margin: 0 auto; }
     .status-bar__text {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
+      letter-spacing: 0.01em;
       margin-bottom: 6px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      color: var(--color-ink);
+      font-variant-numeric: tabular-nums;
     }
-    .status-bar__text i {
-      font-size: 14px;
-    }
-    .status-bar__track {
-      height: 4px;
-      background: var(--color-track);
-      border-radius: 2px;
-      overflow: hidden;
-    }
+    .status-bar__text i { font-size: 11px; color: var(--color-accent); width: 1em; text-align: center; }
+    .status-bar__track { height: 2px; background: var(--color-track); border-radius: 0; overflow: hidden; }
     .status-bar__fill {
       height: 100%;
-      border-radius: 2px;
-      background: linear-gradient(90deg, var(--color-flight), var(--color-progress));
-      transition: width .5s ease;
+      background: var(--color-accent);
+      transition: width 0.35s ease;
       width: 0%;
     }
-
-    /* ── Header ── */
     .flight-header {
       text-align: center;
-      padding: 40px 20px 20px;
-      max-width: 600px;
+      padding: 20px 14px 12px;
+      max-width: var(--layout-max);
       margin: 0 auto;
     }
     .flight-header__route {
-      font-size: clamp(24px, 5vw, 36px);
+      font-size: clamp(1.125rem, 4vw, 1.35rem);
       font-weight: 700;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.02em;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
+      gap: 8px;
       flex-wrap: wrap;
     }
-    .flight-header__route i {
-      color: var(--color-flight);
-      font-size: 0.7em;
-    }
-    .flight-header__sub {
-      color: var(--color-ink-muted);
-      font-size: 14px;
-      margin-top: 6px;
-      font-weight: 500;
-    }
+    .flight-header__route i { color: var(--color-accent); font-size: 0.65em; }
+    .flight-header__sub { color: var(--color-ink-muted); font-size: 12px; margin-top: 6px; font-weight: 500; }
     .flight-header__duration {
-      display: inline-block;
-      background: var(--color-flight-light);
-      color: var(--color-flight);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 4px 14px;
-      border-radius: 20px;
-      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+      margin-top: 10px;
+      padding: 4px 10px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-card);
     }
-
-    /* ── Timeline ── */
-    .timeline {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 10px 20px 40px;
-      position: relative;
-    }
-
-    .segment {
-      display: flex;
-      gap: 16px;
-      position: relative;
-    }
-
-    /* Left rail */
+    .flight-header__duration i { color: var(--color-accent); font-size: 9px; }
+    .timeline { max-width: var(--layout-max); margin: 0 auto; padding: 4px 14px 28px; position: relative; }
+    .segment { display: flex; gap: 10px; position: relative; }
     .segment__rail {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 40px;
+      width: 24px;
       flex-shrink: 0;
     }
-
     .segment__node {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+      width: 26px;
+      height: 26px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
-      color: white;
+      font-size: 11px;
       flex-shrink: 0;
       z-index: 2;
-      transition: all .3s;
       position: relative;
-    }
-    .segment__node--drive { background: var(--color-drive); }
-    .segment__node--wait, .segment__node--layover { background: var(--color-layover); }
-    .segment__node--flight { background: var(--color-flight); }
-    .segment__node--future {
-      background: var(--color-track);
+      background: var(--color-card);
       color: var(--color-ink-muted);
+      border: 1px solid var(--color-border);
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
     }
+    .segment__node--future { opacity: 0.55; }
     .segment__node--complete {
-      background: var(--color-complete) !important;
+      background: var(--color-accent-muted) !important;
+      border-color: var(--color-accent) !important;
+      color: var(--color-accent) !important;
     }
     .segment__node--active {
-      box-shadow: 0 0 0 4px rgba(236, 72, 153, .25);
-      animation: pulse 2s ease-in-out infinite;
+      background: var(--color-accent) !important;
+      border-color: var(--color-accent) !important;
+      color: var(--color-accent-contrast) !important;
+      animation: none;
+      box-shadow: none;
     }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 4px rgba(236, 72, 153, .25); }
-      50% { box-shadow: 0 0 0 8px rgba(236, 72, 153, .12); }
+    @media (prefers-reduced-motion: reduce) {
+      .status-bar__fill, .segment__bar-fill, .card__track-fill, .card__track-plane { transition: none; }
     }
-
     .segment__bar {
-      width: 4px;
-      height: 40px;
+      width: 1px;
+      flex: 1;
+      min-height: 24px;
       background: var(--color-track);
-      border-radius: 2px;
       position: relative;
       overflow: hidden;
-    }
-    .segment__bar--drive {
-      background: repeating-linear-gradient(
-        to bottom,
-        var(--color-track) 0px,
-        var(--color-track) 6px,
-        transparent 6px,
-        transparent 12px
-      );
     }
     .segment__bar-fill {
       position: absolute;
@@ -217,239 +171,192 @@
       left: 0;
       width: 100%;
       height: 0%;
-      border-radius: 2px;
-      transition: height .5s ease;
+      transition: height 0.35s ease;
+      background: var(--color-accent);
     }
-    .segment__bar-fill--drive { background: var(--color-drive); }
-    .segment__bar-fill--wait, .segment__bar-fill--layover { background: var(--color-layover); }
-    .segment__bar-fill--flight { background: var(--color-flight); }
-
-    /* ── Flight Track (inside card) ── */
+    .segment__bar-fill--drive,
+    .segment__bar-fill--wait,
+    .segment__bar-fill--layover,
+    .segment__bar-fill--flight { background: var(--color-accent); }
     .card__track {
       position: relative;
-      height: 28px;
+      height: 22px;
       flex: 1;
       display: flex;
       align-items: center;
       margin: 0 4px;
     }
-    .card__track-line {
-      height: 2px;
-      width: 100%;
-      background: var(--color-track);
-      border-radius: 1px;
-    }
+    .card__track-line { height: 1px; width: 100%; background: var(--color-border); }
     .card__track-fill {
       position: absolute;
       top: 50%;
       left: 0;
       transform: translateY(-50%);
       height: 2px;
-      background: var(--color-flight);
-      border-radius: 1px;
+      background: var(--color-accent);
       width: 0%;
-      transition: width .5s ease;
+      transition: width 0.35s ease;
     }
     .card__track-plane {
       position: absolute;
       top: 50%;
       left: 0%;
       transform: translate(-50%, -50%);
-      color: var(--color-flight);
-      font-size: 14px;
-      transition: left .5s ease;
+      color: var(--color-accent);
+      font-size: 10px;
+      transition: left 0.35s ease;
       z-index: 2;
-      filter: drop-shadow(0 1px 2px rgba(0,0,0,.15));
     }
     .card__track-plane--hidden { opacity: 0; }
-    .card__track-plane--complete { color: var(--color-complete); }
-
-    /* ── Cards ── */
+    .card__track-plane--complete { color: var(--color-accent); }
     .segment__card {
       flex: 1;
       background: var(--color-card);
       border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
+      padding: 10px 12px;
       margin-bottom: 8px;
-      border-left: 4px solid transparent;
-      transition: all .3s;
+      border: 1px solid var(--color-border);
+      transition: border-color 0.15s ease, opacity 0.15s ease;
       position: relative;
     }
-    .segment__card--drive { border-left-color: var(--color-drive); }
-    .segment__card--wait, .segment__card--layover { border-left-color: var(--color-layover); }
-    .segment__card--flight { border-left-color: var(--color-flight); }
-    .segment__card--future { opacity: .5; }
+    .segment__card--future { opacity: 0.5; }
     .segment__card--active {
-      box-shadow: var(--shadow-lg);
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 1px var(--color-accent-muted);
       opacity: 1;
     }
-    .segment__card--complete { opacity: .7; }
-
+    .segment__card--complete { opacity: 0.72; }
     .card__header {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
     }
     .card__type {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      padding: 2px 8px;
-      border-radius: 6px;
-    }
-    .card__type--drive { background: var(--color-drive-light); color: var(--color-drive); }
-    .card__type--wait { background: var(--color-layover-light); color: var(--color-layover); }
-    .card__type--layover { background: var(--color-layover-light); color: var(--color-layover); }
-    .card__type--flight { background: var(--color-flight-light); color: var(--color-flight); }
-
-    .card__flight-no {
-      font-size: 13px;
+      font-size: 9px;
       font-weight: 700;
-      color: var(--color-flight);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 3px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-ink-muted);
     }
-
-    .card__route {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
+    .card__type--drive, .card__type--wait, .card__type--layover, .card__type--flight {
+      background: var(--color-bg);
+      color: var(--color-ink-muted);
+      border-color: var(--color-border);
     }
-    .card__airport {
-      text-align: center;
+    .card__flight-no {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-accent);
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
     }
+    .card__route { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .card__airport { text-align: center; }
     .card__code {
-      font-size: 20px;
+      font-size: 15px;
       font-weight: 700;
       line-height: 1.1;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
     }
-    .card__city {
-      font-size: 11px;
-      color: var(--color-ink-muted);
-      font-weight: 500;
-    }
-
+    .card__city { font-size: 10px; color: var(--color-ink-muted); font-weight: 500; margin-top: 1px; }
     .card__times {
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
-      color: var(--color-ink-muted);
-    }
-    .card__time {
-      font-weight: 600;
-      color: var(--color-ink);
-    }
-    .card__tz {
+      align-items: flex-start;
       font-size: 11px;
       color: var(--color-ink-muted);
-      font-weight: 400;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
     }
-    .card__duration {
-      text-align: center;
-      font-size: 12px;
-      color: var(--color-ink-muted);
-    }
-
-    .card__label {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
+    .card__time { font-weight: 600; color: var(--color-ink); }
+    .card__tz { font-size: 9px; color: var(--color-ink-muted); font-weight: 500; }
+    .card__duration { text-align: center; font-size: 9px; color: var(--color-ink-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .card__duration i { font-size: 8px; color: var(--color-accent); margin-right: 2px; }
+    .card__label { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
     .card__detail {
-      font-size: 13px;
+      font-size: 11px;
       color: var(--color-ink-muted);
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
     }
-
     .card__boarding {
       margin-top: 8px;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--color-layover);
-      background: var(--color-layover-light);
-      padding: 4px 10px;
-      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      color: var(--color-accent);
+      border: 1px dashed var(--color-border);
+      background: var(--color-bg);
+      padding: 4px 8px;
+      border-radius: 4px;
     }
-    .card__boarding i { font-size: 11px; }
-
-    /* ── Destination ── */
-    .destination {
-      max-width: 600px;
-      margin: 0 auto;
-      padding: 0 20px 60px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      padding-left: 76px;
+    .card__boarding i { font-size: 9px; }
+    .card__boarding--pulse { animation: boardingPulseCp 1.5s ease-in-out infinite; }
+    @keyframes boardingPulseCp {
+      0%, 100% { border-color: var(--color-border); }
+      50% { border-color: var(--color-accent); }
     }
+    @media (prefers-reduced-motion: reduce) { .card__boarding--pulse { animation: none; } }
     .destination__node {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      background: var(--color-progress);
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 14px;
       position: absolute;
-      left: 18px;
+      left: 12px;
     }
-    .destination__info {}
-    .destination__flag { font-size: 28px; }
-    .destination__city {
-      font-size: 22px;
-      font-weight: 700;
+    .destination__node--arrived {
+      background: var(--color-accent-muted);
+      border-color: var(--color-accent);
     }
+    .destination__city { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
     .destination__time {
-      font-size: 13px;
+      font-size: 11px;
       color: var(--color-ink-muted);
       font-weight: 500;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
     }
-
     .destination-wrap {
-      max-width: 600px;
+      max-width: var(--layout-max);
       margin: 0 auto;
-      padding: 0 20px 60px;
+      padding: 0 14px 40px;
       position: relative;
       display: flex;
       align-items: center;
     }
-    .destination-wrap .destination__content {
-      margin-left: 56px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* ── Arrived celebration ── */
+    .destination-wrap .destination__content { margin-left: 44px; display: flex; align-items: center; gap: 8px; }
     .arrived-banner {
       display: none;
       text-align: center;
-      padding: 20px;
-      max-width: 600px;
+      padding: 16px 14px 32px;
+      max-width: var(--layout-max);
       margin: 0 auto;
+      border-top: 1px solid var(--color-border);
     }
     .arrived-banner--show { display: block; }
-    .arrived-banner__text {
-      font-size: 24px;
-      font-weight: 700;
-    }
-    .arrived-banner__sub {
-      color: var(--color-ink-muted);
-      font-size: 14px;
-      margin-top: 4px;
-    }
-
-    /* ── Responsive ── */
+    .arrived-banner__text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+    .arrived-banner__sub { color: var(--color-ink-muted); font-size: 12px; margin-top: 4px; }
     @media (max-width: 480px) {
-      .card__code { font-size: 17px; }
-      .segment__card { padding: 12px; }
-      .flight-header { padding: 30px 16px 16px; }
-      .timeline { padding: 10px 16px 40px; }
+      .card__code { font-size: 14px; }
+      .segment__card { padding: 8px 10px; }
     }
   </style>
 </head>
@@ -752,6 +659,7 @@ function updateProgress() {
   const statusText = document.getElementById('statusText');
   const statusFill = document.getElementById('statusFill');
   const arrivedBanner = document.getElementById('arrivedBanner');
+  const destNode = document.getElementById('destNode');
 
   // Overall progress
   const overallFraction = Math.max(0, Math.min(1,
@@ -761,6 +669,7 @@ function updateProgress() {
 
   // Before journey
   if (now < JOURNEY_START) {
+    destNode.classList.remove('destination__node--arrived');
     const remaining = JOURNEY_START - now;
     const days = Math.floor(remaining / 86400000);
     const remAfterDays = remaining % 86400000;
@@ -781,7 +690,7 @@ function updateProgress() {
     statusText.innerHTML = `<i class="fa-solid fa-check-circle"></i><span>Arrived in Porto! 🇵🇹</span>`;
     statusFill.style.width = '100%';
     arrivedBanner.classList.add('arrived-banner--show');
-    document.getElementById('destNode').style.background = 'var(--color-complete)';
+    destNode.classList.add('destination__node--arrived');
 
     SEGMENTS.forEach(seg => {
       setSegmentState(seg.id, 'complete');
@@ -790,6 +699,7 @@ function updateProgress() {
   }
 
   arrivedBanner.classList.remove('arrived-banner--show');
+  destNode.classList.remove('destination__node--arrived');
 
   // Find active segment
   for (let i = 0; i < SEGMENTS.length; i++) {
@@ -843,6 +753,7 @@ function setSegmentState(id, state, fraction) {
   const card = document.getElementById(`card-${id}`);
   const trackFill = document.getElementById(`trackfill-${id}`);
   const trackPlane = document.getElementById(`trackplane-${id}`);
+  const seg = SEGMENTS.find(s => s.id === id);
 
   if (!node || !fill || !card) return;
 
@@ -851,11 +762,16 @@ function setSegmentState(id, state, fraction) {
   card.classList.remove('segment__card--future', 'segment__card--complete', 'segment__card--active');
 
   if (state === 'future') {
+    if (seg) node.innerHTML = `<i class="${seg.icon}"></i>`;
     node.classList.add('segment__node--future');
     card.classList.add('segment__card--future');
     fill.style.height = '0%';
     if (trackFill) trackFill.style.width = '0%';
-    if (trackPlane) { trackPlane.classList.add('card__track-plane--hidden'); trackPlane.style.left = '0%'; }
+    if (trackPlane) {
+      trackPlane.classList.add('card__track-plane--hidden');
+      trackPlane.classList.remove('card__track-plane--complete');
+      trackPlane.style.left = '0%';
+    }
   } else if (state === 'complete') {
     node.classList.add('segment__node--complete');
     node.innerHTML = '<i class="fa-solid fa-check"></i>';
@@ -868,13 +784,14 @@ function setSegmentState(id, state, fraction) {
       trackPlane.style.left = '100%';
     }
   } else if (state === 'active') {
+    if (seg) node.innerHTML = `<i class="${seg.icon}"></i>`;
     node.classList.add('segment__node--active');
     card.classList.add('segment__card--active');
     const pct = ((fraction || 0) * 100).toFixed(1);
     fill.style.height = `${pct}%`;
     if (trackFill) trackFill.style.width = `${pct}%`;
     if (trackPlane) {
-      trackPlane.classList.remove('card__track-plane--hidden');
+      trackPlane.classList.remove('card__track-plane--hidden', 'card__track-plane--complete');
       trackPlane.style.left = `${pct}%`;
     }
   }
@@ -889,9 +806,12 @@ function updateBoardingCountdowns(now) {
     const timeUntilBoarding = seg.boarding.utc - now;
     if (timeUntilBoarding > 0 && timeUntilBoarding < 7200000) {
       boardingEl.innerHTML = `<i class="fa-solid fa-door-open"></i> Boarding in ${formatRemaining(timeUntilBoarding)}`;
-      boardingEl.style.animation = 'pulse 2s ease-in-out infinite';
+      boardingEl.classList.add('card__boarding--pulse');
     } else if (timeUntilBoarding <= 0 && now < seg.arriveUTC) {
       boardingEl.innerHTML = `<i class="fa-solid fa-door-open"></i> Boarding now!`;
+      boardingEl.classList.remove('card__boarding--pulse');
+    } else {
+      boardingEl.classList.remove('card__boarding--pulse');
     }
   });
 }
@@ -903,7 +823,8 @@ function scrollToActive() {
   if (!active) return;
   if (active.id === lastActiveId) return; // only scroll on segment change
   lastActiveId = active.id;
-  active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  active.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
 }
 
 // ── Init ──
