@@ -833,6 +833,11 @@ renderTimeline();
 updateProgress();
 scrollToActive();
 setInterval(() => { updateProgress(); scrollToActive(); }, 30000);
+
+// ── Service Worker (offline support) ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
 </script>
 
 </body>
