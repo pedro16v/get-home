@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Porto → Brisbane — Return Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    :root {
+      --font: "IBM Plex Sans", system-ui, sans-serif;
+      --color-ink: #171717;
+      --color-ink-muted: #737373;
+      --color-bg: #ffffff;
+      --color-card: #fafafa;
+      --color-border: #e5e5e5;
+      --color-track: #e5e5e5;
+      --color-accent: #2563eb;
+      --color-accent-contrast: #ffffff;
+      --color-accent-muted: rgba(37, 99, 235, 0.1);
+      --radius: 8px;
+      --radius-sm: 6px;
+      --layout-max: 600px;
+      --color-flight: var(--color-accent);
+      --color-flight-light: var(--color-accent-muted);
+      --color-layover: var(--color-ink-muted);
+      --color-layover-light: transparent;
+      --color-drive: var(--color-ink-muted);
+      --color-drive-light: transparent;
+      --color-progress: var(--color-accent);
+      --color-complete: var(--color-accent);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --color-ink: #fafafa;
+        --color-ink-muted: #a3a3a3;
+        --color-bg: #0a0a0a;
+        --color-card: #171717;
+        --color-border: #262626;
+        --color-track: #262626;
+        --color-accent: #60a5fa;
+        --color-accent-contrast: #0f172a;
+        --color-accent-muted: rgba(96, 165, 250, 0.15);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font);
+      font-size: 18px;
+      color: var(--color-ink);
+      background: var(--color-bg);
+      min-height: 100vh;
+      line-height: 1.48;
+      -webkit-font-smoothing: antialiased;
+    }
+    .status-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--color-bg);
+      border-bottom: 1px solid var(--color-border);
+      padding: 12px 18px 14px;
+    }
+    .status-bar__inner { max-width: var(--layout-max); margin: 0 auto; }
+    .status-bar__text {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--color-ink);
+      font-variant-numeric: tabular-nums;
+    }
+    .status-bar__text i { font-size: 15px; color: var(--color-accent); width: 1em; text-align: center; }
+    .status-bar__track { height: 3px; background: var(--color-track); border-radius: 0; overflow: hidden; }
+    .status-bar__fill {
+      height: 100%;
+      background: var(--color-accent);
+      transition: width 0.35s ease;
+      width: 0%;
+    }
+    .flight-header {
+      text-align: center;
+      padding: 24px 18px 16px;
+      max-width: var(--layout-max);
+      margin: 0 auto;
+    }
+    .flight-header__route {
+      font-size: clamp(1.5rem, 5vw, 1.85rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .flight-header__route i { color: var(--color-accent); font-size: 0.65em; }
+    .flight-header__sub { color: var(--color-ink-muted); font-size: 16px; margin-top: 8px; font-weight: 500; }
+    .flight-header__duration {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-ink-muted);
+      margin-top: 12px;
+      padding: 7px 14px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      background: var(--color-card);
+    }
+    .flight-header__duration i { color: var(--color-accent); font-size: 12px; }
+    .timeline { max-width: var(--layout-max); margin: 0 auto; padding: 6px 18px 32px; position: relative; }
+    .segment { display: flex; gap: 10px; position: relative; }
+    .segment__rail {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 32px;
+      flex-shrink: 0;
+    }
+    .segment__node {
+      width: 34px;
+      height: 34px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+      z-index: 2;
+      position: relative;
+      background: var(--color-card);
+      color: var(--color-ink-muted);
+      border: 1px solid var(--color-border);
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    .segment__node--future { opacity: 0.55; }
+    .segment__node--complete {
+      background: var(--color-accent-muted) !important;
+      border-color: var(--color-accent) !important;
+      color: var(--color-accent) !important;
+    }
+    .segment__node--active {
+      background: var(--color-accent) !important;
+      border-color: var(--color-accent) !important;
+      color: var(--color-accent-contrast) !important;
+      animation: none;
+      box-shadow: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .status-bar__fill, .segment__bar-fill, .card__track-fill, .card__track-plane { transition: none; }
+    }
+    .segment__bar {
+      width: 1px;
+      flex: 1;
+      min-height: 32px;
+      background: var(--color-track);
+      position: relative;
+      overflow: hidden;
+    }
+    .segment__bar-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 0%;
+      transition: height 0.35s ease;
+      background: var(--color-accent);
+    }
+    .segment__bar-fill--drive,
+    .segment__bar-fill--wait,
+    .segment__bar-fill--layover,
+    .segment__bar-fill--flight { background: var(--color-accent); }
+    .card__track {
+      position: relative;
+      height: 30px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      margin: 0 4px;
+    }
+    .card__track-line { height: 1px; width: 100%; background: var(--color-border); }
+    .card__track-fill {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+      height: 2px;
+      background: var(--color-accent);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+    .card__track-plane {
+      position: absolute;
+      top: 50%;
+      left: 0%;
+      transform: translate(-50%, -50%);
+      color: var(--color-accent);
+      font-size: 14px;
+      transition: left 0.35s ease;
+      z-index: 2;
+    }
+    .card__track-plane--hidden { opacity: 0; }
+    .card__track-plane--complete { color: var(--color-accent); }
+    .segment__card {
+      flex: 1;
+      background: var(--color-card);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 8px;
+      border: 1px solid var(--color-border);
+      transition: border-color 0.15s ease, opacity 0.15s ease;
+      position: relative;
+    }
+    .segment__card--future { opacity: 0.5; }
+    .segment__card--active {
+      border-color: var(--color-accent);
+      box-shadow: 0 0 0 1px var(--color-accent-muted);
+      opacity: 1;
+    }
+    .segment__card--complete { opacity: 0.72; }
+    .card__header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .card__type {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 5px 9px;
+      border-radius: 4px;
+      border: 1px solid var(--color-border);
+      background: var(--color-bg);
+      color: var(--color-ink-muted);
+    }
+    .card__type--drive, .card__type--wait, .card__type--layover, .card__type--flight {
+      background: var(--color-bg);
+      color: var(--color-ink-muted);
+      border-color: var(--color-border);
+    }
+    .card__flight-no {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-accent);
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .card__route { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .card__airport { text-align: center; }
+    .card__code {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .card__city { font-size: 13px; color: var(--color-ink-muted); font-weight: 500; margin-top: 2px; }
+    .card__times {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      font-size: 15px;
+      color: var(--color-ink-muted);
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .card__time { font-weight: 600; color: var(--color-ink); }
+    .card__tz { font-size: 12px; color: var(--color-ink-muted); font-weight: 500; }
+    .card__duration { text-align: center; font-size: 12px; color: var(--color-ink-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .card__duration i { font-size: 11px; color: var(--color-accent); margin-right: 2px; }
+    .card__label { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .card__detail {
+      font-size: 15px;
+      color: var(--color-ink-muted);
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .card__boarding {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      color: var(--color-accent);
+      border: 1px dashed var(--color-border);
+      background: var(--color-bg);
+      padding: 7px 12px;
+      border-radius: 4px;
+    }
+    .card__boarding i { font-size: 12px; }
+    .card__boarding--pulse { animation: boardingPulseCp 1.5s ease-in-out infinite; }
+    @keyframes boardingPulseCp {
+      0%, 100% { border-color: var(--color-border); }
+      50% { border-color: var(--color-accent); }
+    }
+    @media (prefers-reduced-motion: reduce) { .card__boarding--pulse { animation: none; } }
+    .destination__node {
+      width: 38px;
+      height: 38px;
+      border-radius: 5px;
+      background: var(--color-card);
+      border: 1px solid var(--color-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      position: absolute;
+      left: 12px;
+    }
+    .destination__node--arrived {
+      background: var(--color-accent-muted);
+      border-color: var(--color-accent);
+    }
+    .destination__city { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; }
+    .destination__time {
+      font-size: 15px;
+      color: var(--color-ink-muted);
+      font-weight: 500;
+      font-family: ui-monospace, "Cascadia Code", "SF Mono", Menlo, monospace;
+      font-variant-numeric: tabular-nums;
+      margin-top: 2px;
+    }
+    .destination-wrap {
+      max-width: var(--layout-max);
+      margin: 0 auto;
+      padding: 0 18px 44px;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .destination-wrap .destination__content { margin-left: 52px; display: flex; align-items: center; gap: 10px; }
+    .arrived-banner {
+      display: none;
+      text-align: center;
+      padding: 16px 14px 32px;
+      max-width: var(--layout-max);
+      margin: 0 auto;
+      border-top: 1px solid var(--color-border);
+    }
+    .arrived-banner--show { display: block; }
+    .arrived-banner__text { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+    .arrived-banner__sub { color: var(--color-ink-muted); font-size: 16px; margin-top: 6px; }
+    @media (max-width: 480px) {
+      .card__code { font-size: 18px; }
+      .segment__card { padding: 13px 15px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky status bar -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-bar__inner">
+      <div class="status-bar__text" id="statusText">
+        <i class="fa-solid fa-clock"></i>
+        <span>Loading...</span>
+      </div>
+      <div class="status-bar__track">
+        <div class="status-bar__fill" id="statusFill"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="flight-header">
+    <div class="flight-header__route">
+      <span>🇵🇹 Porto</span>
+      <i class="fa-solid fa-plane"></i>
+      <span>Brisbane 🇦🇺</span>
+    </div>
+    <p class="flight-header__sub">Mon 13 Apr – Sun 26 Apr 2026</p>
+    <span class="flight-header__duration">
+      <i class="fa-solid fa-route"></i>&ensp;12d 11h total journey
+    </span>
+  </header>
+
+  <!-- Timeline container -->
+  <div class="timeline" id="timeline"></div>
+
+  <!-- Destination -->
+  <div class="destination-wrap" id="destinationWrap">
+    <div class="destination__node" id="destNode">🇦🇺</div>
+    <div class="destination__content">
+      <div>
+        <div class="destination__city">Brisbane</div>
+        <div class="destination__time">Sun 26 Apr, 9:30am AEST</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrived banner -->
+  <div class="arrived-banner" id="arrivedBanner">
+    <div class="arrived-banner__text">🎉 Welcome home!</div>
+    <div class="arrived-banner__sub">You've arrived in Brisbane — home sweet home!</div>
+  </div>
+
+<script>
+// ── Itinerary Data ──
+const SEGMENTS = [
+  {
+    id: 'drive-home-opo',
+    type: 'drive',
+    label: 'Home → OPO Airport',
+    icon: 'fa-solid fa-car',
+    from: { code: null, city: 'Home', flag: '🏠' },
+    to:   { code: 'OPO', city: 'Porto', flag: '🇵🇹' },
+    departLocal: '1:45pm',
+    arriveLocal: '2:15pm',
+    departTZ: 'WEST',
+    arriveTZ: 'WEST',
+    departUTC: Date.UTC(2026, 3, 13, 12, 45),
+    arriveUTC: Date.UTC(2026, 3, 13, 13, 15),
+    durationLabel: '30 min',
+    boarding: null
+  },
+  {
+    id: 'wait-opo',
+    type: 'wait',
+    label: 'OPO Airport',
+    icon: 'fa-solid fa-clock',
+    from: { code: 'OPO', city: 'Porto', flag: '🇵🇹' },
+    to:   null,
+    departLocal: '2:15pm',
+    arriveLocal: '4:40pm',
+    departTZ: 'WEST',
+    arriveTZ: 'WEST',
+    departUTC: Date.UTC(2026, 3, 13, 13, 15),
+    arriveUTC: Date.UTC(2026, 3, 13, 15, 40),
+    durationLabel: '2h 25m',
+    boarding: {
+      time: '~4:10pm',
+      utc: Date.UTC(2026, 3, 13, 15, 10)
+    }
+  },
+  {
+    id: 'flight-tk1452',
+    type: 'flight',
+    flightNo: 'TK1452',
+    icon: 'fa-solid fa-plane',
+    from: { code: 'OPO', city: 'Porto', flag: '🇵🇹' },
+    to:   { code: 'IST', city: 'Istanbul', flag: '🇹🇷' },
+    departLocal: '4:40pm',
+    arriveLocal: '11:15pm',
+    departTZ: 'WEST',
+    arriveTZ: 'TRT',
+    departUTC: Date.UTC(2026, 3, 13, 15, 40),
+    arriveUTC: Date.UTC(2026, 3, 13, 20, 15),
+    durationLabel: '4h 35m',
+    boarding: null
+  },
+  {
+    id: 'layover-ist',
+    type: 'layover',
+    label: 'IST Layover',
+    icon: 'fa-solid fa-clock',
+    from: { code: 'IST', city: 'Istanbul', flag: '🇹🇷' },
+    to:   null,
+    departLocal: '11:15pm',
+    arriveLocal: '1:40am',
+    departTZ: 'TRT',
+    arriveTZ: 'TRT',
+    departUTC: Date.UTC(2026, 3, 13, 20, 15),
+    arriveUTC: Date.UTC(2026, 3, 13, 22, 40),
+    durationLabel: '2h 25m',
+    boarding: {
+      time: '~1:10am',
+      utc: Date.UTC(2026, 3, 13, 22, 10)
+    }
+  },
+  {
+    id: 'flight-tk68',
+    type: 'flight',
+    flightNo: 'TK68',
+    icon: 'fa-solid fa-plane',
+    from: { code: 'IST', city: 'Istanbul', flag: '🇹🇷' },
+    to:   { code: 'BKK', city: 'Bangkok', flag: '🇹🇭' },
+    departLocal: '1:40am',
+    arriveLocal: '3:05pm',
+    departTZ: 'TRT',
+    arriveTZ: 'ICT',
+    departUTC: Date.UTC(2026, 3, 13, 22, 40),
+    arriveUTC: Date.UTC(2026, 3, 14, 8, 5),
+    durationLabel: '9h 25m',
+    boarding: null
+  },
+  {
+    id: 'stay-bkk',
+    type: 'layover',
+    label: 'BKK Stay',
+    icon: 'fa-solid fa-umbrella-beach',
+    from: { code: 'BKK', city: 'Bangkok', flag: '🇹🇭' },
+    to:   null,
+    departLocal: '3:05pm Tue 14 Apr',
+    arriveLocal: '9:25pm Sat 25 Apr',
+    departTZ: 'ICT',
+    arriveTZ: 'ICT',
+    departUTC: Date.UTC(2026, 3, 14, 8, 5),
+    arriveUTC: Date.UTC(2026, 3, 25, 14, 25),
+    durationLabel: '11d 6h 20m',
+    boarding: {
+      time: '~8:55pm Sat',
+      utc: Date.UTC(2026, 3, 25, 13, 55)
+    }
+  },
+  {
+    id: 'flight-jq66',
+    type: 'flight',
+    flightNo: 'JQ66',
+    icon: 'fa-solid fa-plane',
+    from: { code: 'BKK', city: 'Bangkok', flag: '🇹🇭' },
+    to:   { code: 'BNE', city: 'Brisbane', flag: '🇦🇺' },
+    departLocal: '9:25pm',
+    arriveLocal: '9:30am',
+    departTZ: 'ICT',
+    arriveTZ: 'AEST',
+    departUTC: Date.UTC(2026, 3, 25, 14, 25),
+    arriveUTC: Date.UTC(2026, 3, 25, 23, 30),
+    durationLabel: '9h 5m',
+    boarding: null
+  },
+  {
+    id: 'drive-bne-home',
+    type: 'drive',
+    label: 'BNE Airport → Home',
+    icon: 'fa-solid fa-car',
+    from: { code: 'BNE', city: 'Brisbane', flag: '🇦🇺' },
+    to:   { code: null, city: 'Home', flag: '🏠' },
+    departLocal: '9:30am',
+    arriveLocal: '9:45am',
+    departTZ: 'AEST',
+    arriveTZ: 'AEST',
+    departUTC: Date.UTC(2026, 3, 25, 23, 30),
+    arriveUTC: Date.UTC(2026, 3, 25, 23, 45),
+    durationLabel: '15 min',
+    boarding: null
+  }
+];
+
+const JOURNEY_START = SEGMENTS[0].departUTC;
+const JOURNEY_END = SEGMENTS[SEGMENTS.length - 1].arriveUTC;
+
+// ── Time Override ──
+// Use ?t=2026-03-26T06:00Z (ISO 8601 UTC) to simulate a point in time
+// Or use ?t=50 for a percentage through the journey (0–100)
+function getTime() {
+  const param = new URLSearchParams(window.location.search).get('t');
+  if (!param) return Date.now();
+  const pct = Number(param);
+  if (!isNaN(pct) && pct >= 0 && pct <= 100) {
+    return JOURNEY_START + (JOURNEY_END - JOURNEY_START) * (pct / 100);
+  }
+  const parsed = Date.parse(param);
+  if (!isNaN(parsed)) return parsed;
+  return Date.now();
+}
+
+// ── Helpers ──
+function formatRemaining(ms) {
+  const totalMin = Math.ceil(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h === 0) return `${m}m`;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+// ── Render Timeline ──
+function renderTimeline() {
+  const container = document.getElementById('timeline');
+  container.innerHTML = '';
+
+  SEGMENTS.forEach((seg, i) => {
+    const el = document.createElement('div');
+    el.className = 'segment';
+    el.id = `seg-${seg.id}`;
+
+    el.innerHTML = `
+      <div class="segment__rail">
+        <div class="segment__node segment__node--${seg.type}" id="node-${seg.id}">
+          <i class="${seg.icon}"></i>
+        </div>
+        <div class="segment__bar ${seg.type === 'drive' ? 'segment__bar--drive' : ''}"
+             id="bar-${seg.id}">
+          <div class="segment__bar-fill segment__bar-fill--${seg.type}" id="fill-${seg.id}"></div>
+        </div>
+      </div>
+      <div class="segment__card segment__card--${seg.type}" id="card-${seg.id}">
+        ${renderCardContent(seg)}
+      </div>
+    `;
+
+    container.appendChild(el);
+  });
+}
+
+function renderCardContent(seg) {
+  if (seg.type === 'flight') {
+    return `
+      <div class="card__header">
+        <span class="card__type card__type--flight">Flight</span>
+        <span class="card__flight-no">${seg.flightNo}</span>
+      </div>
+      <div class="card__route">
+        <div class="card__airport">
+          <div class="card__code">${seg.from.flag} ${seg.from.code}</div>
+          <div class="card__city">${seg.from.city}</div>
+        </div>
+        <div class="card__track" id="track-${seg.id}">
+          <div class="card__track-line"></div>
+          <div class="card__track-fill" id="trackfill-${seg.id}"></div>
+          <i class="fa-solid fa-plane card__track-plane card__track-plane--hidden" id="trackplane-${seg.id}"></i>
+        </div>
+        <div class="card__airport">
+          <div class="card__code">${seg.to.code} ${seg.to.flag}</div>
+          <div class="card__city">${seg.to.city}</div>
+        </div>
+      </div>
+      <div class="card__times">
+        <div><span class="card__time">${seg.departLocal}</span> <span class="card__tz">${seg.departTZ}</span></div>
+        <div class="card__duration"><i class="fa-solid fa-clock"></i> ${seg.durationLabel}</div>
+        <div><span class="card__time">${seg.arriveLocal}</span> <span class="card__tz">${seg.arriveTZ}</span></div>
+      </div>
+    `;
+  }
+
+  if (seg.type === 'drive') {
+    return `
+      <div class="card__header">
+        <span class="card__type card__type--drive">Drive</span>
+      </div>
+      <div class="card__label">${seg.label}</div>
+      <div class="card__detail">
+        ${seg.departLocal} → ${seg.arriveLocal} <span class="card__tz">${seg.departTZ}</span>
+        &nbsp;·&nbsp; ${seg.durationLabel}
+      </div>
+    `;
+  }
+
+  // wait / layover
+  const typeLabel = seg.type === 'wait' ? 'At Airport' : 'Layover';
+  return `
+    <div class="card__header">
+      <span class="card__type card__type--${seg.type}">${typeLabel}</span>
+    </div>
+    <div class="card__label">${seg.from.flag} ${seg.from.code} — ${seg.from.city}</div>
+    <div class="card__detail">
+      ${seg.departLocal} → ${seg.arriveLocal} <span class="card__tz">${seg.departTZ}</span>
+      &nbsp;·&nbsp; ${seg.durationLabel}
+    </div>
+    ${seg.boarding ? `
+      <div class="card__boarding" id="boarding-${seg.id}">
+        <i class="fa-solid fa-door-open"></i>
+        Est. boarding ${seg.boarding.time}
+      </div>
+    ` : ''}
+  `;
+}
+
+// ── Progress Updates ──
+function updateProgress() {
+  const now = getTime();
+  const statusText = document.getElementById('statusText');
+  const statusFill = document.getElementById('statusFill');
+  const arrivedBanner = document.getElementById('arrivedBanner');
+  const destNode = document.getElementById('destNode');
+
+  // Overall progress
+  const overallFraction = Math.max(0, Math.min(1,
+    (now - JOURNEY_START) / (JOURNEY_END - JOURNEY_START)
+  ));
+  statusFill.style.width = `${(overallFraction * 100).toFixed(1)}%`;
+
+  // Before journey
+  if (now < JOURNEY_START) {
+    destNode.classList.remove('destination__node--arrived');
+    const remaining = JOURNEY_START - now;
+    const days = Math.floor(remaining / 86400000);
+    const remAfterDays = remaining % 86400000;
+    let countdownStr = formatRemaining(remAfterDays);
+    if (days > 0) countdownStr = `${days}d ${countdownStr}`;
+    statusText.innerHTML = `<i class="fa-solid fa-hourglass-half"></i><span>Departure in ${countdownStr}</span>`;
+    statusFill.style.width = '0%';
+
+    // All segments future
+    SEGMENTS.forEach(seg => {
+      setSegmentState(seg.id, 'future');
+    });
+    return;
+  }
+
+  // After journey
+  if (now > JOURNEY_END) {
+    statusText.innerHTML = `<i class="fa-solid fa-check-circle"></i><span>Arrived in Porto! 🇵🇹</span>`;
+    statusFill.style.width = '100%';
+    arrivedBanner.classList.add('arrived-banner--show');
+    destNode.classList.add('destination__node--arrived');
+
+    SEGMENTS.forEach(seg => {
+      setSegmentState(seg.id, 'complete');
+    });
+    return;
+  }
+
+  arrivedBanner.classList.remove('arrived-banner--show');
+  destNode.classList.remove('destination__node--arrived');
+
+  // Find active segment
+  for (let i = 0; i < SEGMENTS.length; i++) {
+    const seg = SEGMENTS[i];
+
+    if (now < seg.departUTC) {
+      setSegmentState(seg.id, 'future');
+      continue;
+    }
+
+    if (now > seg.arriveUTC) {
+      setSegmentState(seg.id, 'complete');
+      continue;
+    }
+
+    // Active segment
+    const fraction = (now - seg.departUTC) / (seg.arriveUTC - seg.departUTC);
+    setSegmentState(seg.id, 'active', fraction);
+
+    // Status bar text
+    const remaining = seg.arriveUTC - now;
+    let statusLabel = '';
+    if (seg.type === 'flight') {
+      statusLabel = `Flight ${seg.flightNo} ${seg.from.code} → ${seg.to.code}`;
+    } else if (seg.type === 'drive') {
+      statusLabel = seg.label;
+    } else if (seg.type === 'wait') {
+      statusLabel = `At ${seg.from.code} Airport`;
+    } else {
+      statusLabel = `${seg.from.code} Layover`;
+    }
+
+    const icon = seg.type === 'flight' ? 'fa-plane' :
+                 seg.type === 'drive' ? 'fa-car' : 'fa-clock';
+    statusText.innerHTML = `<i class="fa-solid ${icon}"></i><span>${statusLabel} — ${formatRemaining(remaining)} remaining</span>`;
+
+    // Check boarding countdowns for upcoming wait/layover segments
+    updateBoardingCountdowns(now);
+
+    // Mark remaining as future
+    for (let j = i + 1; j < SEGMENTS.length; j++) {
+      setSegmentState(SEGMENTS[j].id, 'future');
+    }
+    break;
+  }
+}
+
+function setSegmentState(id, state, fraction) {
+  const node = document.getElementById(`node-${id}`);
+  const fill = document.getElementById(`fill-${id}`);
+  const card = document.getElementById(`card-${id}`);
+  const trackFill = document.getElementById(`trackfill-${id}`);
+  const trackPlane = document.getElementById(`trackplane-${id}`);
+  const seg = SEGMENTS.find(s => s.id === id);
+
+  if (!node || !fill || !card) return;
+
+  // Reset classes
+  node.classList.remove('segment__node--future', 'segment__node--complete', 'segment__node--active');
+  card.classList.remove('segment__card--future', 'segment__card--complete', 'segment__card--active');
+
+  if (state === 'future') {
+    if (seg) node.innerHTML = `<i class="${seg.icon}"></i>`;
+    node.classList.add('segment__node--future');
+    card.classList.add('segment__card--future');
+    fill.style.height = '0%';
+    if (trackFill) trackFill.style.width = '0%';
+    if (trackPlane) {
+      trackPlane.classList.add('card__track-plane--hidden');
+      trackPlane.classList.remove('card__track-plane--complete');
+      trackPlane.style.left = '0%';
+    }
+  } else if (state === 'complete') {
+    node.classList.add('segment__node--complete');
+    node.innerHTML = '<i class="fa-solid fa-check"></i>';
+    card.classList.add('segment__card--complete');
+    fill.style.height = '100%';
+    if (trackFill) trackFill.style.width = '100%';
+    if (trackPlane) {
+      trackPlane.classList.remove('card__track-plane--hidden');
+      trackPlane.classList.add('card__track-plane--complete');
+      trackPlane.style.left = '100%';
+    }
+  } else if (state === 'active') {
+    if (seg) node.innerHTML = `<i class="${seg.icon}"></i>`;
+    node.classList.add('segment__node--active');
+    card.classList.add('segment__card--active');
+    const pct = ((fraction || 0) * 100).toFixed(1);
+    fill.style.height = `${pct}%`;
+    if (trackFill) trackFill.style.width = `${pct}%`;
+    if (trackPlane) {
+      trackPlane.classList.remove('card__track-plane--hidden', 'card__track-plane--complete');
+      trackPlane.style.left = `${pct}%`;
+    }
+  }
+}
+
+function updateBoardingCountdowns(now) {
+  SEGMENTS.forEach(seg => {
+    if (!seg.boarding) return;
+    const boardingEl = document.getElementById(`boarding-${seg.id}`);
+    if (!boardingEl) return;
+
+    const timeUntilBoarding = seg.boarding.utc - now;
+    if (timeUntilBoarding > 0 && timeUntilBoarding < 7200000) {
+      boardingEl.innerHTML = `<i class="fa-solid fa-door-open"></i> Boarding in ${formatRemaining(timeUntilBoarding)}`;
+      boardingEl.classList.add('card__boarding--pulse');
+    } else if (timeUntilBoarding <= 0 && now < seg.arriveUTC) {
+      boardingEl.innerHTML = `<i class="fa-solid fa-door-open"></i> Boarding now!`;
+      boardingEl.classList.remove('card__boarding--pulse');
+    } else {
+      boardingEl.classList.remove('card__boarding--pulse');
+    }
+  });
+}
+
+// ── Scroll to active ──
+let lastActiveId = null;
+function scrollToActive() {
+  const active = document.querySelector('.segment__card--active');
+  if (!active) return;
+  if (active.id === lastActiveId) return; // only scroll on segment change
+  lastActiveId = active.id;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  active.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+}
+
+// ── Init ──
+renderTimeline();
+updateProgress();
+scrollToActive();
+setInterval(() => { updateProgress(); scrollToActive(); }, 30000);
+
+// ── Service Worker (offline support) ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+
+</body>
+</html>

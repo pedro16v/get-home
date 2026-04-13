@@ -1,7 +1,8 @@
-const CACHE_NAME = 'flight-tracker-v1';
+const CACHE_NAME = 'flight-tracker-v2';
 const URLS_TO_CACHE = [
   './',
   './flight.html',
+  './return.html',
   'https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
 ];
